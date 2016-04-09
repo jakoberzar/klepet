@@ -26,7 +26,11 @@ function procesirajVnosUporabnika(klepetApp, socket) {
     sporocilo = filtirirajVulgarneBesede(sporocilo);
     klepetApp.posljiSporocilo(trenutniKanal, sporocilo);
     var slike = vstavSlikoCeJe(sporocilo);
-    $('#sporocila').append(divElementEnostavniTekst(sporocilo)).append(slike);
+    var video = vstaviYTCeJe(sporocilo);
+    if (slike && video) video = '<br>' + video;
+    $('#sporocila').append(divElementEnostavniTekst(sporocilo))
+                   .append(slike)
+                   .append(video);
     $('#sporocila').scrollTop($('#sporocila').prop('scrollHeight'));
   }
 
@@ -65,6 +69,21 @@ function vstavSlikoCeJe(vhod) {
       izhod += '<img src="' + matches[i] + '" style="margin-left:20px; width:200px"/>';
     }
   }
+  return izhod
+}
+
+function vstaviYTCeJe(vhod) {
+  var regexstr = 'https:\\/\\/www\\.youtube\\.com\\/watch\\?v=';
+  var matches = vhod.match(new RegExp(regexstr + '+\\S+', 'gi'));
+  var izhod = "";
+  if (matches) {
+    for(var i = 0; i < matches.length; i++) {
+      if (izhod) izhod += '<br>';
+      var id = matches[i].replace(new RegExp(regexstr, 'gi'), '');
+      izhod += '<iframe src="https://www.youtube.com/embed/' + id
+               + '" allowfullscreen style="height:150px; width:200px; margin-left:20px"></iframe>';
+    }
+  }
   return izhod;
 }
 
@@ -91,8 +110,12 @@ $(document).ready(function() {
 
   socket.on('sporocilo', function (sporocilo) {
     var slike = vstavSlikoCeJe(sporocilo.besedilo);
-    var novElement = divElementEnostavniTekst(sporocilo.besedilo).append(slike);
-    $('#sporocila').append(novElement);
+    var video = vstaviYTCeJe(sporocilo.besedilo);
+    if (slike && video) video = '<br>' + video; // Če je oboje prisotno, gre video v novo vrsto
+    var novElement = divElementEnostavniTekst(sporocilo.besedilo);
+    $('#sporocila').append(novElement)
+                   .append(slike)
+                   .append(video);
   });
   
   socket.on('kanali', function(kanali) {
