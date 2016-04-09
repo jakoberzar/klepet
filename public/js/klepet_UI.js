@@ -145,6 +145,13 @@ $(document).ready(function() {
         $input.focus();
     });
   });
+  
+  socket.on('dregljaj', function(podatki) {
+    $('#vsebina').jrumble().trigger('startRumble');
+    setTimeout(function() {
+      $('#vsebina').trigger('stopRumble');
+    }, 1500);
+  })
 
   setInterval(function() {
     socket.emit('kanali');
